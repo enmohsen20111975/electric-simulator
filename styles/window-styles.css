@@ -1,0 +1,95 @@
+/* Floating Windows */
+.floating-window {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    min-width: 250px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+.window-header {
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    user-select: none;
+}
+
+.window-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.window-controls button {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0 4px;
+    font-size: 1.2rem;
+}
+
+.window-controls button:hover {
+    color: #333;
+}
+
+/* Menu Bar */
+.menu-bar {
+    background: white;
+    border-bottom: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 14px;
+}
+
+.menu-item {
+    position: relative;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    color: #333;
+}
+
+.menu-item:hover {
+    background: #f0f0f0;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    display: none;
+    z-index: 1000;
+    margin-top: 2px;
+}
+
+.menu-item:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    color: #333;
+    display: block;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f0f0f0;
+}

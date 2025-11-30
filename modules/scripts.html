@@ -1,0 +1,34 @@
+<!-- scripts.html - All JavaScript Includes -->
+
+<!-- External Libraries -->
+<script src="../component-database/electronic-components.js"></script>
+<script>window.COMPONENT_LIBRARY = window.ELECTRONIC_COMPONENTS || ELECTRONIC_COMPONENTS;</script>
+<script src="simulation-engine.js"></script>
+
+<!-- App Modules (Small & Easy to Edit!) -->
+<script src="app-config.js"></script>
+<script src="app-state.js"></script>
+<script src="app-init.js"></script>
+<script src="app.js"></script>
+<script src="app-main.js"></script>
+
+<!-- Initialize App -->
+<script>
+    if (typeof init === 'function') {
+        init();
+    }
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const icon = themeToggle.querySelector('i');
+            if (document.body.classList.contains('light-theme')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+    }
+</script>

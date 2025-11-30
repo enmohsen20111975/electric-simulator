@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circuit Simulator | SmartEducation.sbs</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/window-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 110px);
+        }
+
+        /* Component Sidebar */
+        .component-panel {
+            width: 200px;
+            background: white;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .component-category {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 11px;
+            text-transform: uppercase;
+            cursor: pointer;
+            padding: 5px;
+            background: #e9ecef;
+            border-radius: 3px;
+            user-select: none;
+        }
+
+        .category-title:hover {
+            background: #dee2e6;
+        }
+
+        .category-title::before {
+            content: '▼ ';
+            font-size: 8px;
+        }
+
+        .category-title.collapsed::before {
+            content: '▶ ';
+        }
+
+        .category-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            padding: 5px 0;
+        }
+
+        .component-item {
+            padding: 8px 4px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 10px;
+            transition: all 0.2s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .component-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .component-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Canvas Area */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: white;
+            background-image:
+                linear-gradient(#e0e0e0 1px, transparent 1px),
+                linear-gradient(90deg, #e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        /* Properties Panel */
+        .properties-panel {
+            width: 280px;
+            background: white;
+            border-left: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            margin-bottom: 25px;
+        }
+
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .property-row {
+            margin-bottom: 12px;
+        }
+
+        .property-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .property-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .measurement-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .measurement-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: #2d3748;
+            color: white;
+            padding: 5px 20px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            min-width: 400px;
+            max-width: 500px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            ⚡ Circuit Simulator
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="menu-item">
+                File
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item" onclick="createNewCircuit()">New</a>
+                    <a href="#" class="dropdown-item" onclick="saveCircuit()">Save</a>
+                    <a href="#" class="dropdown-item" onclick="loadCircuit()">Load</a>
+                    <a href="#" class="dropdown-item" onclick="exportCircuitToPDF()">Export PDF</a>
+                </div>
+            </div>
+            <button class="btn" onclick="showLoginModal()">Login</button>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <!-- Menu Bar -->
+    <div class="menu-bar">
+        <div class="menu-item">
+            Edit
+            <div class="dropdown-menu">
+                <a href="#" class="dropdown-item" onclick="undo()">Undo</a>
+                <a href="#" class="dropdown-item" onclick="redo()">Redo</a>
+                <span style="border-left: 1px solid #ddd; margin: 0 5px;"></span>
+
+                <!-- Undo/Redo Buttons -->
+                <button class="btn" onclick="undo()" title="Undo (Ctrl+Z)" id="undoBtn">⏪ Undo</button>
+                <button class="btn" onclick="redo()" title="Redo (Ctrl+Y)" id="redoBtn">⏩ Redo</button>
+                <span style="border-left: 1px solid #ddd; margin: 0 5px;"></span>
+
+                <!-- Export Dropdown -->
+                <div style="position: relative; display: inline-block;">
+                    <button class="btn" onclick="toggleExportMenu()" id="exportBtn">📤 Export ▾</button>
+                    <div id="exportMenu"
+                        style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000; margin-top: 5px;">
+                        <div
+                            style="padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid #ddd; font-weight: 600; color: #333; font-size: 13px;">
+                            Export Circuit
+                        </div>
+                        <div onclick="exportCircuitToPDF(); toggleExportMenu()"
+                            style="padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s; font-size: 13px;">
+                            <div style="font-weight: 600; color: #dc2626; margin-bottom: 2px;">📄 PDF Document</div>
+                            <div style="font-size: 11px; color: #666;">Professional report with BOM</div>
+                        </div>
+                        <div onclick="exportCircuitToPNG(); toggleExportMenu()"
+                            style="padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s; font-size: 13px;">
+                            <div style="font-weight: 600; color: #059669; margin-bottom: 2px;">🖼️ PNG Image</div>
+                            <div style="font-size: 11px; color: #666;">High-resolution image (2x)</div>
+                        </div>
+                        <div onclick="exportCircuitToJSON(); toggleExportMenu()"
+                            style="padding: 10px 16px; cursor: pointer; transition: all 0.2s; font-size: 13px;">
+                            <div style="font-weight: 600; color: #2563eb; margin-bottom: 2px;">💾 JSON Data</div>
+                            <div style="font-size: 11px; color: #666;">Circuit data for import</div>
+                        </div>
+                    </div>
+                </div>
+                <span style="border-left: 1px solid #ddd; margin: 0 5px;"></span>
+
+                <!-- Circuit Templates Dropdown -->
+                <div style="position: relative; display: inline-block;">
+                    <button class="btn" onclick="toggleTemplateMenu()" id="templateBtn">📋 Templates ▾</button>
+                    <div id="templateMenu"
+                        style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; z-index: 1000; margin-top: 5px;">
+                        <div
+                            style="padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid #ddd; font-weight: 600; color: #333; font-size: 13px;">
+                            Industrial Circuit Templates
+                        </div>
+                        <div onclick="addTemplateToCircuit('DOL_STARTER', 150, 100); toggleTemplateMenu()"
+                            style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #1e40af; margin-bottom: 4px; font-size: 13px;">⚡ DOL
+                                Motor
+                                Starter</div>
+                            <div style="font-size: 11px; color: #666;">Direct-On-Line starter with MCB + Contactor +
+                                Overload
+                            </div>
+                        </div>
+                        <div onclick="addTemplateToCircuit('STAR_DELTA_STARTER', 100, 80); toggleTemplateMenu()"
+                            style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #1e40af; margin-bottom: 4px; font-size: 13px;">⭐
+                                Star-Delta
+                                Starter</div>
+                            <div style="font-size: 11px; color: #666;">Reduced current starting with 3 contactors +
+                                timer</div>
+                        </div>
+                        <div onclick="addTemplateToCircuit('FORWARD_REVERSE_STARTER', 100, 80); toggleTemplateMenu()"
+                            style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #1e40af; margin-bottom: 4px; font-size: 13px;">🔄
+                                Forward-Reverse Starter</div>
+                            <div style="font-size: 11px; color: #666;">Reversing control with interlocking + E-stop
+                            </div>
+                        </div>
+                        <div onclick="addTemplateToCircuit('VFD_MOTOR_DRIVE', 180, 80); toggleTemplateMenu()"
+                            style="padding: 12px 16px; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #1e40af; margin-bottom: 4px; font-size: 13px;">📊 VFD
+                                Motor
+                                Drive</div>
+                            <div style="font-size: 11px; color: #666;">Variable frequency drive with protection</div>
+                        </div>
+                    </div>
+                </div>
+
+                <span style="border-left: 1px solid #ddd; margin: 0 5px;"></span>
+                <button class="btn btn-success" onclick="runSimulation()">▶️ Simulate</button>
+                <button class="btn btn-danger" onclick="stopSimulation()">⏹️ Stop</button>
+                <button class="btn" onclick="analyzePowerFlow()"
+                    style="background: #7c3aed; color: white; border-color: #7c3aed;">📊 Analyze</button>
+                <button class="btn" onclick="resetCanvas()">🔄 Reset</button>
+                <span style="border-left: 1px solid #ddd; margin: 0 5px;"></span>
+                <button class="btn" onclick="toggleWireDebug()" id="debugBtn" title="Show wire routing zones">🔧 Debug
+                    Routing</button>
+                <span style="border-left: 1px solid #ddd; margin: 0 5px;"></span>
+
+                <!-- Wire Color Picker -->
+                <span style="font-size: 12px; margin-right: 5px; color: #666;">Wire Color:</span>
+                <button class="btn" onclick="setWireColor('#2563eb')"
+                    style="background: #2563eb; width: 30px; padding: 4px;" title="Blue"></button>
+                <button class="btn" onclick="setWireColor('#dc2626')"
+                    style="background: #dc2626; width: 30px; padding: 4px;" title="Red"></button>
+                <button class="btn" onclick="setWireColor('#16a34a')"
+                    style="background: #16a34a; width: 30px; padding: 4px;" title="Green"></button>
+                <button class="btn" onclick="setWireColor('#eab308')"
+                    style="background: #eab308; width: 30px; padding: 4px;" title="Yellow"></button>
+                <button class="btn" onclick="setWireColor('#000000')"
+                    style="background: #000000; width: 30px; padding: 4px;" title="Black"></button>
+                <button class="btn" onclick="setWireColor('#ea580c')"
+                    style="background: #ea580c; width: 30px; padding: 4px;" title="Orange"></button>
+                <button class="btn" onclick="setWireColor('#9333ea')"
+                    style="background: #9333ea; width: 30px; padding: 4px;" title="Purple"></button>
+                <button class="btn" onclick="setWireColor('#78350f')"
+                    style="background: #78350f; width: 30px; padding: 4px;" title="Brown"></button>
+                <span style="border-left: 1px solid #ddd; margin: 0 5px;"></span>
+
+                <button class="btn" onclick="zoom(0.1)">🔍+</button>
+                <button class="btn" onclick="zoom(-0.1)">🔍-</button>
+            </div>
+
+            <style>
+                #templateMenu>div:not(:first-child):hover,
+                #exportMenu>div:not(:first-child):hover {
+                    background: #f0f7ff;
+                }
+
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes slideOutRight {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+            </style>
+
+            <script>
+                function toggleTemplateMenu() {
+                    const menu = document.getElementById('templateMenu');
+                    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+                    // Close export menu
+                    const exportMenu = document.getElementById('exportMenu');
+                    if (exportMenu) exportMenu.style.display = 'none';
+                }
+
+                function toggleExportMenu() {
+                    const menu = document.getElementById('exportMenu');
+                    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+                    // Close template menu
+                    const templateMenu = document.getElementById('templateMenu');
+                    if (templateMenu) templateMenu.style.display = 'none';
+                }
+
+                // Close menus when clicking outside
+                document.addEventListener('click', function (e) {
+                    const templateMenu = document.getElementById('templateMenu');
+                    const templateBtn = document.getElementById('templateBtn');
+                    const exportMenu = document.getElementById('exportMenu');
+                    const exportBtn = document.getElementById('exportBtn');
+
+                    if (templateMenu && templateBtn && !templateMenu.contains(e.target) && !templateBtn.contains(e.target)) {
+                        templateMenu.style.display = 'none';
+                    }
+
+                    if (exportMenu && exportBtn && !exportMenu.contains(e.target) && !exportBtn.contains(e.target)) {
+                        exportMenu.style.display = 'none';
+                    }
+                });
+            </script>
+
+            <!-- Main Container -->
+            <div class="main-container">
+                <div class="component-panel">
+                    <div class="component-category">
+                        <div class="category-title">⚡ POWER SOURCES</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="voltage_dc" onclick="window.selectTool('voltage_dc')">V~ DC</div>
+                            <div class="component-item" data-type="voltage_ac" onclick="window.selectTool('voltage_ac')">V~ AC</div>
+                            <div class="component-item" data-type="current_dc" onclick="window.selectTool('current_dc')">I~ DC</div>
+                            <div class="component-item" data-type="pulse" onclick="window.selectTool('pulse')">Pulse</div>
+                            <div class="component-item" data-type="vcvs" onclick="window.selectTool('vcvs')">VCVS</div>
+                            <div class="component-item" data-type="vccs" onclick="window.selectTool('vccs')">VCCS</div>
+                            <div class="component-item" data-type="ccvs" onclick="window.selectTool('ccvs')">CCVS</div>
+                            <div class="component-item" data-type="cccs" onclick="window.selectTool('cccs')">CCCS</div>
+                        </div>
+                    </div>
+                    <div class="component-category">
+                        <div class="category-title">🛡️ PROTECTION</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="mcb" onclick="window.selectTool('mcb')">MCB</div>
+                            <div class="component-item" data-type="mccb" onclick="window.selectTool('mccb')">MCCB</div>
+                            <div class="component-item" data-type="rcd" onclick="window.selectTool('rcd')">RCD</div>
+                            <div class="component-item" data-type="thermal" onclick="window.selectTool('thermal')">Thermal</div>
+                            <div class="component-item" data-type="fuse" onclick="window.selectTool('fuse')">Fuse</div>
+                            <div class="component-item" data-type="overload" onclick="window.selectTool('overload')">Overload</div>
+                        </div>
+                    </div>
+                    <div class="component-category">
+                        <div class="category-title">💡 INDICATORS</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="pilot_light_red" onclick="window.selectTool('pilot_light_red')">Pilot Red</div>
+                            <div class="component-item" data-type="pilot_light_green" onclick="window.selectTool('pilot_light_green')">Pilot Green</div>
+                        </div>
+                    </div>
+                    <div class="component-category">
+                        <div class="category-title">🔘 CONTROLS</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="pushbutton_no" onclick="window.selectTool('pushbutton_no')">Push NO</div>
+                            <div class="component-item" data-type="selector_switch" onclick="window.selectTool('selector_switch')">Selector</div>
+                            <div class="component-item" data-type="emergency_stop" onclick="window.selectTool('emergency_stop')">E-Stop</div>
+                        </div>
+                    </div>
+                    <div class="component-category">
+                        <div class="category-title">⚙️ DRIVES & VFD</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="vfd" onclick="window.selectTool('vfd')">VFD</div>
+                            <div class="component-item" data-type="soft_starter" onclick="window.selectTool('soft_starter')">Soft Starter</div>
+                        </div>
+                    </div>
+                    <div class="component-category">
+                        <div class="category-title">🔄 TRANSFORMERS</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="transformer_1phase" onclick="window.selectTool('transformer_1phase')">1Φ Transf</div>
+                            <div class="component-item" data-type="transformer_3phase" onclick="window.selectTool('transformer_3phase')">3Φ Transf</div>
+                        </div>
+                    </div>
+                    <div class="component-category">
+                        <div class="category-title">🤖 AUTOMATION</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="plc_cpu" onclick="window.selectTool('plc_cpu')">PLC CPU</div>
+                        </div>
+                    </div>
+                    <div class="component-category">
+                        <div class="category-title">⏱️ TIMERS</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="timer_relay_on_delay" onclick="window.selectTool('timer_relay_on_delay')">Timer Relay</div>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+                            <div class="component-item" data-type="pilot_light_green"
+                                onclick="window.selectTool('pilot_light_green')">
+                                🟢 Pilot Green
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        <!-- Header and Toolbar remain unchanged -->
+                    </div>
+
+                    <div class="component-category" data-domain="electrical">
+                        <div class="category-title">⏱️ TIMERS</div>
+                        <div class="category-content">
+                            <div class="component-item" data-type="timer_relay_on_delay"
+                                onclick="window.selectTool('timer_relay_on_delay')">
+                                ⏱️ Timer Relay
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Canvas -->
+                <!-- Canvas -->
+                <div class="canvas-container">
+                    <canvas id="canvas"></canvas>
+                </div>
+
+                <!-- Properties Panel -->
+                <div class="properties-panel">
+                    <div class="panel-section">
+                        <div class="panel-title">Component Properties</div>
+                        <div class="component-panel">
+                            ...existing code...
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas"></canvas>
+                        </div>
+                        <div class="properties-panel">
+                            <div class="panel-section">
+                                <div class="panel-title">Component Properties</div>
+                                <div id="propertiesContent">
+                                    <p style="color: #999; font-size: 13px;">Select a component to view properties</p>
+                                </div>
+                            </div>
+                            <div class="panel-section">
+                                <div class="panel-title">Measurements</div>
+                                <div class="measurement-item">
+                                    <span>Voltage:</span>
+                                    <span class="measurement-value" id="voltageDisplay">--</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span>Current:</span>
+                                    <span class="measurement-value" id="currentDisplay">--</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span>Power:</span>
+                                    <span class="measurement-value" id="powerDisplay">--</span>
+                                </div>
+                            </div>
+                        </div>
+            <script src="components/kicad-symbols/PassiveComponents.js"></script>
+            <script src="components/kicad-symbols/Semiconductors.js"></script>
+            <script src="components/kicad-symbols/DigitalLogic.js"></script>
+            <script src="components/kicad-symbols/IndustrialComponents.js"></script>
+            <script src="components/kicad-symbols/ControlDevices.js"></script>
+            <script src="components/kicad-symbols/index.js"></script>
+
+            <!-- Features -->
+            <script src="features/circuit-templates.js"></script>
+            <script src="features/clipboard-history.js"></script>
+            <script src="features/circuit-export.js"></script>
+            <script src="features/power-flow-calculator.js"></script>
+            <script src="features/electrical-control-components.js"></script>
+
+            <!-- Main Engine (must load last) -->
+            <script src="features/professional-circuit-engine.js"></script>
+        </body>
+
+</html>

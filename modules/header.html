@@ -1,0 +1,40 @@
+<!-- header.html - Header Block -->
+<header class="header">
+    <div class="header-content">
+        <div class="brand-section">
+            <a href="https://smarteducation.sbs/" class="site-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SmartEducation.sbs</span>
+            </a>
+            <div class="divider"></div>
+            <div class="logo">
+                <i class="fas fa-microchip"></i>
+                <h1>Circuit Simulator</h1>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button id="themeToggle" class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Top Toolbar -->
+<div class="top-toolbar">
+    <div class="toolbar-left">
+        <button class="toolbar-btn"><i class="fas fa-file"></i> New</button>
+        <button id="saveBtn" class="toolbar-btn"><i class="fas fa-save"></i> Save</button>
+        <button id="loadBtn" class="toolbar-btn"><i class="fas fa-folder-open"></i> Load</button>
+        <input type="file" id="loadFileInput" accept=".json" style="display: none;">
+    </div>
+    <div class="toolbar-center">
+        <button id="runSimBtn" class="toolbar-btn toolbar-btn-primary"><i class="fas fa-play"></i> Build</button>
+        <button id="stopSimBtn" class="toolbar-btn toolbar-btn-danger"><i class="fas fa-stop"></i> Stop</button>
+        <button id="resetSimBtn" class="toolbar-btn"><i class="fas fa-redo"></i> Reset</button>
+    </div>
+    <div class="toolbar-right">
+        <button id="zoomIn" class="toolbar-btn"><i class="fas fa-search-plus"></i></button>
+        <button id="zoomOut" class="toolbar-btn"><i class="fas fa-search-minus"></i></button>
+    </div>
+</div>
